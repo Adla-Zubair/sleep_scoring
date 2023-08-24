@@ -40,7 +40,7 @@ df2 = dataframe0a.iloc[:,[1,4]]
 ind0 = df2[' Time'].isin(df1[' Time']) & df1[' Time'].isin(df2[' Time'])
 ind0.value_counts()
 
-df1[ind0].append(df2[ind0])
+# df1[ind0].append(df2[ind0])
 
 
 boolean_mask_column2 = df1[ind0][' Annotation'] == df2[ind0][' Annotation']
