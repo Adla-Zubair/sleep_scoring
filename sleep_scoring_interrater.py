@@ -3,6 +3,10 @@
 Created on Thu Aug 24 14:38:03 2023
 
 @author: WS3
+
+- The given python code uses txt files containing the annotations for sleep stages scored to the same subject by two scorers.
+- The file is faulty wherein the time epochs are not completely overlapping. 
+
 """
 
 
@@ -12,13 +16,14 @@ import mne
 import glob
 import numpy as np
 from sklearn.metrics import cohen_kappa_score
+from tkinter.filedialog import askdirectory
 
-path_files = 'C:\Users\WS3\Downloads'
+path_files = '\Users\WS3\Downloads'
 
 
 #%%
 # Loading dataset containing the scored sleep data
-file_by_krishan  = glob.glob(path_files + '/*scoredbykrishan.txt')
+file_by_krishan  = glob.glob('/*scoredbykrishan.txt')
 file_by_adla  = glob.glob(path_files + '/*scoredbyadla.txt')
 
 #%%
@@ -47,4 +52,10 @@ boolean_mask_column2 = df1[ind0][' Annotation'] == df2[ind0][' Annotation']
 
 print("Boolean mask for Column2:")
 print(boolean_mask_column2)
+
+#%%
+# Looking at epochs that were a mismatch
+df1[ind0][boolean_mask_column2 == False] # for df1
+df2[ind0][boolean_mask_column2 == False] # for df2
+
 
