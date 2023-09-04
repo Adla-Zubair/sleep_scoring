@@ -10,7 +10,7 @@ Created on Thu Aug 24 14:38:03 2023
 """
 
 
-# importing panda library
+# Importing required libraries
 import pandas as pd
 import mne
 import glob
@@ -18,44 +18,58 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score
 from tkinter.filedialog import askdirectory
 
-path_files = '\Users\WS3\Downloads'
+path_files = '/serverdata/ccshome/adla/'
 
 
 #%%
 # Loading dataset containing the scored sleep data
-file_by_krishan  = glob.glob('/*scoredbykrishan.txt')
-file_by_adla  = glob.glob(path_files + '/*scoredbyadla.txt')
+
+
+# Opening a UI asking to select scored EDF files
+scored_files = askopenfilenames(title = "Select Scored files",
+                              filetypes = (("CSV file","*.csv"),
+                              ('All files', '*.*')))
+
+files_by_krishan  = glob.glob(path_files + '/*reduced_krishan.csv')
+files_by_adla  = glob.glob(path_files + '/*scoredbyadla.csv')
+
 
 #%%
+
+interraters = []
 # Reading given csv file and creating dataframe
-
-# Loading data  of scorer 1
-dataframe0k = pd.read_csv(file_by_krishan[0])
-dataframe0k.drop(dataframe0k.index[dataframe0k[' Annotation'] == ' EEG arousal'], inplace = True)
-
-# Loading data  of scorer 2
-dataframe0a = pd.read_csv(file_by_adla[1])  
-dataframe0a.drop(dataframe0a.index[dataframe0a[' Annotation'] == ' EEG arousal'], inplace = True)
-
-# Loading dataframe containing time and annotation
-df1 = dataframe0k.iloc[:,[1,4]]
-df2 = dataframe0a.iloc[:,[1,4]]
-
-# Finding common time stamps between the two dataframes
-ind0 = df2[' Time'].isin(df1[' Time']) & df1[' Time'].isin(df2[' Time'])
-ind0.value_counts()
-
-# df1[ind0].append(df2[ind0])
-
-
-boolean_mask_column2 = df1[ind0][' Annotation'] == df2[ind0][' Annotation']
-
-print("Boolean mask for Column2:")
-print(boolean_mask_column2)
+for i in range(len(files_by_adla)):
+    
+    # Loading data  of scorer 1
+    df1 = pd.read_csv(files_by_krishan[i])
+    
+    
+    # Loading data  of scorer 2
+    df2 = pd.read_csv(files_by_adla[i])  
+    
+    
+    # Finding common time stamps between the two dataframes
+    
+    
+    # Finding common time stamps between the two dataframes
+    ind0 = df2['W'].isin(df1['W']) & df1['W'].isin(df2['W'])
+    ind0.value_counts()
+    interrater = df1[ind0]['W'] == df2[ind0]['W']
+    interraters.append(interrater)
+    print(interrater.value_counts())
 
 #%%
 # Looking at epochs that were a mismatch
-df1[ind0][boolean_mask_column2 == False] # for df1
-df2[ind0][boolean_mask_column2 == False] # for df2
+#df1[ind0][boolean_mask_column2 == False] # for df1
+#df2[ind0][boolean_mask_column2 == False] # for df2
+
+true_epochs = []
+for i in range(len(interraters)):
+    
+    true_epochs.append(sum(interraters[i])/interraters[i].count())
+    
+    
+interrater_score = np.mean(true_epochs) * 100
+    
 
 
