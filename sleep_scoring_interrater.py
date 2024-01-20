@@ -5,12 +5,13 @@ Created on Thu Aug 24 14:38:03 2023
 @author: WS3
 
 - The given python code uses txt files containing the annotations for sleep stages scored to the same subject by two scorers.
-- The file is faulty wherein the time epochs are not completely overlapping. 
+
 
 """
 
 
 # Importing required libraries
+
 import pandas as pd
 import mne
 import glob
@@ -18,7 +19,7 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score
 from tkinter.filedialog import askdirectory
 
-path_files = '/serverdata/ccshome/adla/'
+path_files = '/serverdata/ccshome/adla/NAS/Adla/scored_csv'
 
 
 #%%
@@ -26,20 +27,19 @@ path_files = '/serverdata/ccshome/adla/'
 
 
 # Opening a UI asking to select scored EDF files
-scored_files = askopenfilenames(title = "Select Scored files",
-                              filetypes = (("CSV file","*.csv"),
-                              ('All files', '*.*')))
 
-files_by_krishan  = glob.glob(path_files + '/*reduced_krishan.csv')
-files_by_adla  = glob.glob(path_files + '/*scoredbyadla.csv')
+files_by_krishan  = sorted(glob.glob(path_files + '/*reduced_krishan.csv'))
+files_by_adla  = sorted(glob.glob(path_files + '/*scoredbyadla.csv'))
 
 
+for x in files_by_adla:
+   xx = x.split('_')
+   print(xx)
 #%%
 
 interraters = []
-# Reading given csv file and creating dataframe
+
 for i in range(len(files_by_adla)):
-    
     # Loading data  of scorer 1
     df1 = pd.read_csv(files_by_krishan[i])
     
@@ -47,14 +47,18 @@ for i in range(len(files_by_adla)):
     # Loading data  of scorer 2
     df2 = pd.read_csv(files_by_adla[i])  
     
+    #discrepency in loading the dataframe
+    df1.columns = ['stage']
+
+    df2.rename(columns={"W": "stage"}, inplace=True)
     
     # Finding common time stamps between the two dataframes
     
     
-    # Finding common time stamps between the two dataframes
-    ind0 = df2['W'].isin(df1['W']) & df1['W'].isin(df2['W'])
+    # Finding common time stamps between the two dataframes (precaution)
+    ind0 = df2['stage'].isin(df1['stage']) & df1['stage'].isin(df2['stage'])
     ind0.value_counts()
-    interrater = df1[ind0]['W'] == df2[ind0]['W']
+    interrater = df1[ind0]['stage'] == df2[ind0]['stage']
     interraters.append(interrater)
     print(interrater.value_counts())
 
@@ -69,7 +73,8 @@ for i in range(len(interraters)):
     true_epochs.append(sum(interraters[i])/interraters[i].count())
     
     
+    
 interrater_score = np.mean(true_epochs) * 100
     
-
+    
 
